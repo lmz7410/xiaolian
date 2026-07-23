@@ -27,15 +27,15 @@
   const input = document.getElementById('guard-password');
   const submit = document.getElementById('guard-submit');
   const error = document.getElementById('guard-error');
-  // Simple hash check - password: xiaolian2024
-  const correctHash = '7b8a0e6e8d5c3a1f9e2d4b6c0a8f3e7d1c5b9a2e6f0d4c8b3a7e1d5c9b2f6a0e';
+  // Simple hash check - password: Lmz@qwe78
+  const correctHash = '8a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b';
   
   function checkPassword() {
     const pwd = input.value;
     // Simple string comparison hash
     let hash = 0;
     for(let i=0;i<pwd.length;i++){hash=((hash<<5)-hash)+pwd.charCodeAt(i);hash|=0;}
-    if(String(hash) === '-1068474682' || pwd === 'xiaolian2024') {
+    if(String(hash) === '-393253351' || pwd === 'Lmz@qwe78') {
       guard.style.display = 'none';
       localStorage.setItem('guard_passed','1');
     } else {
