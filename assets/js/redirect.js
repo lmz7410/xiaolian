@@ -51,7 +51,7 @@ import { WORKER_URL } from './config.js';
                 }
                 document.getElementById('redirect-card').innerHTML = instructionHTML;
             } else {
-                fetch(`${WORKER_URL}/api/resolve/${shortId}`)
+                fetch(`${WORKER_URL}/${shortId}`)
                     .then(response => {
                         if (!response.ok) {
                             return response.json().then(err => {
