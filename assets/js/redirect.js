@@ -6,46 +6,50 @@ import { WORKER_URL } from './config.js';
         const shortId = params.get('id');
 
         if (shortId) {
-            document.title = '跳转中...';
-            document.body.className = 'redirect-mode'; // Add class for external CSS
+            document.title = '安全跳转中...';
+            document.body.className = 'redirect-mode';
             const mainContainer = document.getElementById('main-container');
             if (mainContainer) {
                 mainContainer.innerHTML = `
-                    <div id="tips">
-                        <h2>正在安全跳转...</h2>
-                        <div class="loader"></div>
+                    <div id="redirect-card">
+                        <div class="redirect-icon">
+                            <svg class="spinner" viewBox="0 0 50 50">
+                                <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
+                            </svg>
+                        </div>
+                        <h2 class="redirect-title">正在安全跳转</h2>
+                        <p class="redirect-subtitle">请稍候，正在为您导航至目标页面</p>
+                        <div class="redirect-progress">
+                            <div class="redirect-progress-bar"></div>
+                        </div>
+                        <p class="redirect-hint" style="display:none;">如果没有自动跳转，请 <a id="redirect-link" href="#">点击这里</a></p>
                     </div>
                 `;
             }
-            
+
             const ua = navigator.userAgent.toLowerCase();
             const isWeixin = ua.indexOf('micromessenger') !== -1;
             const isQQ = ua.indexOf('qq') !== -1;
             const isMobile = /iphone|ipad|ipod|android/.test(ua);
 
             if (isWeixin || isQQ) {
-                let instructionHTML = '<h2>请在外部浏览器中打开</h2>';
-                if(isWeixin){
+                let instructionHTML = '';
+                instructionHTML += '<div class="browser-icon"><i class="fas fa-globe"></i></div>';
+                instructionHTML += '<h2 class="redirect-title">请在外部浏览器中打开</h2>';
+                if (isWeixin) {
                     if (isMobile) {
-                        instructionHTML += '<p>1.点击右上角的菜单按钮(通常是三个点)<br>2.选择<i class="fas fa-globe"></i>“用浏览器打开”</p>';
+                        instructionHTML += '<p class="redirect-subtitle">点击右上角菜单按钮（三个点）→ 选择"用浏览器打开"</p>';
                     } else {
-                        instructionHTML += `<a href="${window.location.href}" target="_blank">
-                                            <div style="margin-bottom: 1em; font-size: 48px;"><i class="fas fa-globe"></i></div>
-                                            <p>请点击图标或复制网址，<br>并在您电脑的浏览器中打开。</p>
-                                         </a>`;
+                        instructionHTML += '<p class="redirect-subtitle">请复制网址，在电脑浏览器中打开</p>';
                     }
-                    document.getElementById('tips').innerHTML = instructionHTML;}
-                else{
+                } else {
                     if (isMobile) {
-                        instructionHTML += '<p>1.点击右上角的菜单按钮(通常是三个点)<br>2. 选择<i class="fas fa-globe">“浏览器"</i><br>如果没有菜单按钮请复制链接至浏览器打开</p>';
+                        instructionHTML += '<p class="redirect-subtitle">点击右上角菜单按钮 → 选择"浏览器打开"</p>';
                     } else {
-                        instructionHTML += `<a href="${window.location.href}" target="_blank">
-                                            <div style="margin-bottom: 1em; font-size: 48px;"><i class="fas fa-globe"></i></div>
-                                            <p>请点击图标或复制网址，<br>并在您电脑的浏览器中打开。</p>
-                                         </a>`;
+                        instructionHTML += '<p class="redirect-subtitle">请复制网址，在电脑浏览器中打开</p>';
                     }
-                    document.getElementById('tips').innerHTML = instructionHTML;
                 }
+                document.getElementById('redirect-card').innerHTML = instructionHTML;
             } else {
                 fetch(`${WORKER_URL}/api/resolve/${shortId}`)
                     .then(response => {
@@ -63,17 +67,30 @@ import { WORKER_URL } from './config.js';
                     })
                     .then(data => {
                         if (data && data.url) {
-                            window.location.href = data.url;
+                            const linkEl = document.getElementById('redirect-link');
+                            if (linkEl) linkEl.href = data.url;
+                            const hintEl = document.querySelector('.redirect-hint');
+                            if (hintEl) hintEl.style.display = 'block';
+                            const bar = document.querySelector('.redirect-progress-bar');
+                            if (bar) bar.style.width = '100%';
+                            setTimeout(() => {
+                                window.location.href = data.url;
+                            }, 800);
                         } else {
                             throw new Error('从服务器返回的数据格式无效。');
                         }
                     })
                     .catch(error => {
                         console.error('Redirect error:', error);
-                        document.getElementById('tips').innerHTML = `<h2>跳转失败</h2><p>${error.message}</p>`;
+                        document.getElementById('redirect-card').innerHTML = `
+                            <div class="redirect-icon error">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h2 class="redirect-title">跳转失败</h2>
+                            <p class="redirect-subtitle">${error.message}</p>
+                        `;
                     });
             }
         }
-        // If no 'id', the script does nothing and the rest of the page loads normally.
     });
 })();
