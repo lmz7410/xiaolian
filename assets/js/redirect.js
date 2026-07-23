@@ -47,14 +47,14 @@ import { WORKER_URL } from './config.js';
                     document.getElementById('tips').innerHTML = instructionHTML;
                 }
             } else {
-                fetch(`${WORKER_URL}${shortId}`)
+                fetch(`${WORKER_URL}/api/resolve/${shortId}`)
                     .then(response => {
                         if (!response.ok) {
                             return response.json().then(err => {
                                 let message = '链接未找到或已失效。';
                                 if (err && err.error) {
                                     if (err.error.includes('expired')) message = '此链接已过期。';
-                                    if (err.error.includes('maximum number of visits')) message = '此链接已达到最大访问次数。';
+                                    if (err.error.includes('maximum number of visits') || err.error.includes('Max visits')) message = '此链接已达到最大访问次数。';
                                 }
                                 throw new Error(message);
                             });
