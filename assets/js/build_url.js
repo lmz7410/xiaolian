@@ -1,4 +1,4 @@
-import { WORKER_URL, SHORT_URL_DOMAIN } from './config.js';
+import { WORKER_URL, GITHUB_PAGES_URL } from './config.js';
 
 /**
  * Handles the short URL generation process.
@@ -44,8 +44,8 @@ export async function build_url() {
             throw new Error(data.error || `API Error: ${response.statusText}`);
         }
 
-        // 使用 s.lmz7410.qzz.io 短链域名（直接跳转，无需密码）
-        const shortUrl = `${SHORT_URL_DOMAIN}/${data.id}`;
+        // 短链格式: https://lmz7410.github.io/xiaolian/?id=xxx
+        const shortUrl = new URL(`?id=${data.id}`, GITHUB_PAGES_URL).href;
 
         resultElement.innerHTML = '';
 
