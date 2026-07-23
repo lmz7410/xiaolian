@@ -1,4 +1,4 @@
-import { WORKER_URL, GITHUB_PAGES_URL } from './config.js';
+import { WORKER_URL, SHORT_URL_DOMAIN } from './config.js';
 
 /**
  * Handles the short URL generation process.
@@ -10,7 +10,7 @@ export async function build_url() {
     const resultElement = document.getElementById('b_url');
 
     let longUrl = urlInput.value.trim();
-    const expiresInHours = parseFloat(expiresInHoursInput.value) || null;
+    const expiresInHours = parseFloat(expiresInHoursInput.value) || 24;
     const maxVisits = parseInt(maxVisitsInput.value, 10) || null;
 
     // Automatically add https:// if protocol is missing
@@ -44,9 +44,10 @@ export async function build_url() {
             throw new Error(data.error || `API Error: ${response.statusText}`);
         }
 
-        const shortUrl = new URL(`?id=${data.id}`, GITHUB_PAGES_URL).href;
+        // 使用 s.lmz7410.qzz.io 短链域名（直接跳转，无需密码）
+        const shortUrl = `${SHORT_URL_DOMAIN}/${data.id}`;
 
-        resultElement.innerHTML = ''; // Clear previous content
+        resultElement.innerHTML = '';
 
         const successMessage = document.createElement('span');
         successMessage.textContent = '生成成功！短链接： ';
@@ -66,11 +67,7 @@ export async function build_url() {
 
     } catch (error) {
         console.error('Error generating short URL:', error);
-        resultElement.innerHTML = `<span style="color: #ff4d4f;">生成失败：</span>`;
-        const errorMessageSpan = document.createElement('span');
-        errorMessageSpan.style.color = '#ff4d4f';
-        errorMessageSpan.textContent = error.message;
-        resultElement.appendChild(errorMessageSpan);
+        resultElement.innerHTML = `<span style="color: #ff4d4f;">生成失败：${error.message}</span>`;
     }
 }
 
@@ -115,7 +112,6 @@ window.copyToClipboard = function(text) {
 function isValidHttpUrl(string) {
     try {
         const url = new URL(string);
-        // More robust check for http/https and a basic domain structure
         return (url.protocol === 'http:' || url.protocol === 'https:') && url.hostname.includes('.');
     } catch (_) {
         return false;
