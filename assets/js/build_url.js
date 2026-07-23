@@ -44,7 +44,7 @@ export async function build_url() {
             throw new Error(data.error || `API Error: ${response.statusText}`);
         }
 
-        const shortUrl = new URL(`?id=${data.id}`, window.location.origin).href;
+        const shortUrl = new URL(data.id, WORKER_URL).href;
 
         resultElement.innerHTML = ''; // Clear previous content
 
